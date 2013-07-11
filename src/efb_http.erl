@@ -7,7 +7,7 @@
 
 handle(Req, _Args) ->
     case elli_request:path(Req) of
-        [?GRAPH_URL | _Path] ->
+        [?GRAPH_PREFIX | _Path] ->
             handle_graph(elli_request:method(Req), Req);
         _ ->
             {404, [], <<"Not Found">>}
