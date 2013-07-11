@@ -12,8 +12,7 @@ to_integer(B) when is_binary(B) ->
 to_integer(L) when is_list(L) ->
     case catch ?l2i(L) of
         {'EXIT', _} ->
-            throw({g8, validation, not_a_valid_integer,
-                   [{list_to_convert, L}]});
+            throw({error, {not_a_valid_integer, L}});
         Int ->
             Int
     end.
