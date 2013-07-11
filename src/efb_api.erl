@@ -25,7 +25,7 @@ get_payment_details(SReq) when is_binary(SReq) ->
 
 get_payment_details(PayId) when is_integer(PayId) ->
     AppToken = efb_conf:get(app_token),
-    {ok, Res} = efb_graph:get_payment_details(PayId, [{access_token, AppToken}]),
+    {ok, Res} = efb_graph:get_payment_details(PayId, AppToken),
     jiffy:decode(Res).
 
 -spec get_app_access_token() -> binary().

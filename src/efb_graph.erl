@@ -9,9 +9,8 @@
 -define(TIMEOUT, 5000).  % 5 seconds
 
 -spec get_payment_details(integer(), [{term(), term()}]) -> binary().
-get_payment_details(PayId, Args) ->
-    Url = <<?GRAPH_URL/binary, (?TO_B(PayId))/binary, (list_to_qs(Args))/binary>>,
-    get_url(Url).
+get_payment_details(PayId, AppToken) ->
+    get_url(build_url(PayId, [{access_token, AppToken}])).
 
 -spec get_app_access_token(binary(), binary()) -> binary().
 get_app_access_token(FbId, FbSecret) ->
@@ -24,6 +23,9 @@ get_app_access_token(FbId, FbSecret) ->
 % -------------------------------------------------------------------
 % Internal functions
 % -------------------------------------------------------------------
+build_url(Id, Args) ->
+    <<?GRAPH_URL/binary, (?TO_B(Id))/binary, (list_to_qs(Args))/binary>>.
+
 list_to_qs(PList) ->
     lists:foldl(fun ({Key, Val}, <<>>) ->
                         <<$?, (?TO_B(Key))/binary, "=", (?TO_B(Val))/binary>>;
