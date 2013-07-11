@@ -8,10 +8,12 @@
 %% TODO: Add Oauth support
 -define(TIMEOUT, 5000).  % 5 seconds
 
+-spec get_payment_details(integer(), [{term(), term()}]) -> binary().
 get_payment_details(PayId, Args) ->
     Url = <<?GRAPH_URL/binary, (?TO_B(PayId))/binary, (list_to_qs(Args))/binary>>,
     get_url(Url).
 
+-spec get_app_access_token(binary(), binary()) -> binary().
 get_app_access_token(FbId, FbSecret) ->
     Url = <<?GRAPH_URL/binary,
             "oauth/access_token?grant_type=client_credentials&client_id=",

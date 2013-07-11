@@ -32,6 +32,7 @@ get_payment_details(PayId) when is_integer(PayId) ->
 get_app_access_token() ->
     get_app_access_token(efb_conf:get(fb_id), efb_conf:get(fb_secret)).
 
+-spec get_app_access_token(binary(), binary()) -> binary().
 get_app_access_token(FbId, FbSecret) ->
     {ok, Res} = efb_graph:get_app_access_token(FbId, FbSecret),
     hd(tl(binary:split(Res, <<"=">>))).
