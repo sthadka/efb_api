@@ -15,3 +15,5 @@
 -define(TO_I(I), efb_lib:to_integer(I)).
 -define(TO_B(B), efb_lib:to_binary(B)).
 -define(TO_L(L), efb_lib:to_list(L)).
+
+-define(GRAPH_URL, <<"graph">>).
