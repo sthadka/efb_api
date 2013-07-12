@@ -16,4 +16,4 @@
 -define(TO_B(B), efb_lib:to_binary(B)).
 -define(TO_L(L), efb_lib:to_list(L)).
 
--define(GRAPH_PREFIX, <<"graph">>).
+-define(GRAPH_PREFIX, <<"lpay">>).
