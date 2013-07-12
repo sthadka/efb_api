@@ -23,8 +23,7 @@ handle_event(_, _, _) ->
 handle_graph('POST', Req) ->
     SignedRequest = proplists:get_value(<<"signed_request">>, get_args(Req)),
     Details = efb_api:get_payment_details(SignedRequest),
-    Callback = efb_conf:get(callback),
-    callback_exec({Callback, payment_event, Details}),
+    callback_exec(payment_event, Details),
     {200, [{<<"Content-Type">>, <<"text/plain">>}], <<"OK">>};
 
 handle_graph('GET', _Req) ->
@@ -32,9 +31,9 @@ handle_graph('GET', _Req) ->
 handle_graph(_Mehtod, _Req) ->
     {405, [], <<"Method Not Allowed">>}.
 
-callback_exec({Fun, Order, Req}) ->
-    Callback = erl_fb_payment_conf:get(callback),
-    Callback:Fun(Order, Req).
+callback_exec(F, A) ->
+    Callback = efb_conf:get(callback),
+    Callback:F(A).
 
 get_args(Req) ->
     case catch elli_request:body_qs(Req) of
