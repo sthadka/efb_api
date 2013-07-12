@@ -21,8 +21,7 @@ handle_event(_, _, _) ->
 % -------------------------------------------------------------------
 
 handle_graph('POST', Req) ->
-    Args = elli_request:get_args(Req),
-    SignedRequest = proplists:get_value(<<"signed_request">>, Args),
+    SignedRequest = proplists:get_value(<<"signed_request">>, get_args(Req)),
     Details = efb_api:get_payment_details(SignedRequest),
     Callback = efb_conf:get(callback),
     callback_exec({Callback, payment_event, Details}),
@@ -36,3 +35,9 @@ handle_graph(_Mehtod, _Req) ->
 callback_exec({Fun, Order, Req}) ->
     Callback = erl_fb_payment_conf:get(callback),
     Callback:Fun(Order, Req).
+
+get_args(Req) ->
+    case catch elli_request:body_qs(Req) of
+        {'EXIT', {badarg, _}} -> elli_request:get_args(Req);
+        BodyArgs -> elli_request:get_args(Req) ++ BodyArgs
+    end.
