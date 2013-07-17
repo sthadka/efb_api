@@ -1,7 +1,9 @@
 -module(efb_api).
 
 -export([setup/1,get_payment_details/1,
-         get_app_access_token/0, get_app_access_token/2]).
+         get_app_access_token/0, get_app_access_token/2,
+         verify_token/1
+        ]).
 
 -include_lib("efb.hrl").
 
@@ -36,6 +38,11 @@ get_app_access_token() ->
 get_app_access_token(FbId, FbSecret) ->
     {ok, Res} = efb_graph:get_app_access_token(FbId, FbSecret),
     hd(tl(binary:split(Res, <<"=">>))).
+
+%% Verify real time api token
+-spec verify_token(binary()) -> boolean().
+verify_token(Token) ->
+    Token =:= ?TO_B(efb_conf:get(realtime_token)).
 
 % -------------------------------------------------------------------
 % Internal functions

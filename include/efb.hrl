@@ -17,3 +17,4 @@
 -define(TO_L(L), efb_lib:to_list(L)).
 
 -define(GRAPH_PREFIX, <<"lpay">>).
+-define(REALTIME_PREFIX, <<"rtpay">>).
