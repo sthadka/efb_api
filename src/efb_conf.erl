@@ -11,7 +11,7 @@
 
 -spec new() -> Table :: table().
 new() ->
-    ets:new(?MODULE, [named_table, {read_concurrency, true}]).
+    ets:new(?MODULE, [named_table, {read_concurrency, true}, public]).
 
 -spec set(Key::term(), Val::term()) -> true.
 set(Key, Value) ->
