@@ -34,8 +34,21 @@ handle_graph('GET', _Req) ->
 handle_graph(_Mehtod, _Req) ->
     {405, [], <<"Method Not Allowed">>}.
 
+%% Realtime API callback
+%% TODO: Make this more general to handle other real time calls
+handle_realtime('POST', Req) ->
+    Payload = elli_request:body(Req),
+    Signature = get_signature(Req),
+    case efb_api:validate_signature(Signature, Payload) of
+        true  ->
+            lists:foreach(fun (Type, Detail) ->
+                                  callback_exec(get_fun(Type), Detail)
+                          end, efb_api:parse_realtime_payload(Payload));
+        false ->
+            % TODO: log this
+            ok
+    end,
 
-handle_realtime('POST', _Req) ->
     {200, [{<<"Content-Type">>, <<"text/plain">>}], <<"OK">>};
 
 %% Real time API "Subscription Verification"
@@ -53,8 +66,6 @@ handle_realtime('GET', Req) ->
 handle_realtime(_Mehtod, _Req) ->
     {405, [], <<"Method Not Allowed">>}.
 
-
-
 callback_exec(F, A) ->
     Callback = efb_conf:get(callback),
     Callback:F(A).
@@ -64,3 +75,11 @@ get_args(Req) ->
         {'EXIT', {badarg, _}} -> elli_request:get_args(Req);
         BodyArgs -> elli_request:get_args(Req) ++ BodyArgs
     end.
+
+get_signature(Req) ->
+    H = elli_request:get_header(<<"X-Hub-Signature">>, Req),
+    lists:nth(2, binary:split(H, <<"=">>)).
+
+%% Map FB realtime API object to internal callback function
+get_fun(<<"payments">>) ->
+    payment_event.

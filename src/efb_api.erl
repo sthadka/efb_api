@@ -2,7 +2,7 @@
 
 -export([setup/1,get_payment_details/1,
          get_app_access_token/0, get_app_access_token/2,
-         verify_token/1
+         verify_token/1, validate_signature/2, parse_realtime_payload/1
         ]).
 
 -include_lib("efb.hrl").
@@ -44,6 +44,18 @@ get_app_access_token(FbId, FbSecret) ->
 verify_token(Token) ->
     Token =:= ?TO_B(efb_conf:get(realtime_token)).
 
+%% Validate realtime payload signature
+-spec validate_signature(binary(), binary()) -> boolean().
+validate_signature(Payload, Signature) ->
+    <<Mac:160/integer>> = crypto:sha_mac(efb_conf:get(fb_secret), Payload),
+    lists:flatten(io_lib:format("~40.16.0b", [Mac])) =:= Signature.
+
+-spec parse_realtime_payload(binary()) -> {binary(), [binary()]}.
+parse_realtime_payload(Payload) ->
+    Type = jsonpath:search(<<"object">>, Payload),
+    Entries =  jsonpath:search(<<"entry">>, Payload),
+    {Type, get_details(Type, Entries)}.
+
 % -------------------------------------------------------------------
 % Internal functions
 % -------------------------------------------------------------------
@@ -71,3 +83,10 @@ verify_token(Token) ->
 %                                  throw({error, callback_function_missing})
 %                          end
 %                  end, ReqCallbacks).
+
+%% Query graph api based on type for details
+get_details(<<"payments">>, Entries) ->
+    lists:map(fun (Entry) ->
+                      PayId = ?TO_I(jsonpath:search(<<"id">>, Entry)),
+                      efb_api:get_payment_details(PayId)
+              end, Entries).
