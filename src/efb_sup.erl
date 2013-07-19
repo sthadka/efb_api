@@ -42,13 +42,15 @@ graph_pool() ->
     poolboy:child_spec(Name, PoolArgs, WorkerArgs).
 
 graph_pool_size() ->
-    case efb_conf:get(pool_size) of
-        undefined -> ?POOL_SIZE;
-        Size      -> Size
+    case catch efb_conf:get(pool_size) of
+        {'EXIT', _} -> ?POOL_SIZE;
+        undefined   -> ?POOL_SIZE;
+        Size        -> Size
     end.
 
 graph_pool_overflow_size() ->
-    case efb_conf:get(pool_overflow_size) of
-        undefined -> ?POOL_OVERFLOW_SIZE;
-        Size      -> Size
+    case catch efb_conf:get(pool_overflow_size) of
+        {'EXIT', _} -> ?POOL_OVERFLOW_SIZE;
+        undefined   -> ?POOL_OVERFLOW_SIZE;
+        Size        -> Size
     end.

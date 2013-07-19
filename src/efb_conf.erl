@@ -4,7 +4,7 @@
 %%%-------------------------------------------------------------------
 -module(efb_conf).
 
--export([new/0, reset/0, to_list/0,
+-export([new/0, reset/0, to_list/0, del/0,
          get/1, set/2, set/1, del/1]).
 
 -type table() :: term().
@@ -33,6 +33,10 @@ get(Key) ->
 -spec del(Key::term())-> true.
 del(Key) ->
     ets:delete(?MODULE, Key).
+
+-spec del()-> true.
+del() ->
+    ets:delete(?MODULE).
 
 -spec to_list() -> [{term(), term()}].
 to_list() ->

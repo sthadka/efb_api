@@ -10,7 +10,14 @@
 % -------------------------------------------------------------------
 
 start(_StartType, _StartArgs) ->
+    % Start lhttpc
+    application:start(crypto),
+    application:start(public_key),
+    application:start(ssl),
+    application:start(lhttpc),
+
     efb_sup:start_link().
 
 stop(_State) ->
+    efb_conf:del(),
     ok.
