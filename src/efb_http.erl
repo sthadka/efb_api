@@ -41,7 +41,7 @@ handle_realtime('POST', Req) ->
     Signature = get_signature(Req),
     case efb_api:validate_signature(Payload, Signature) of
         true  ->
-            lists:foreach(fun (Type, Detail) ->
+            lists:foreach(fun ({Type, Detail}) ->
                                   callback_exec(get_fun(Type), Detail)
                           end, efb_api:parse_realtime_payload(Payload));
         false ->

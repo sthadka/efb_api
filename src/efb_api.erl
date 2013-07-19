@@ -55,7 +55,7 @@ validate_signature(Payload, Signature) ->
 parse_realtime_payload(Payload) ->
     Type = jsonpath:search(<<"object">>, Payload),
     Entries =  jsonpath:search(<<"entry">>, Payload),
-    {Type, get_details(Type, Entries)}.
+    get_details(Type, Entries).
 
 % -------------------------------------------------------------------
 % Internal functions
@@ -86,8 +86,8 @@ parse_realtime_payload(Payload) ->
 %                  end, ReqCallbacks).
 
 %% Query graph api based on type for details
-get_details(<<"payments">>, Entries) ->
+get_details(<<"payments">>=Type, Entries) ->
     lists:map(fun (Entry) ->
                       PayId = ?TO_I(jsonpath:search(<<"id">>, Entry)),
-                      efb_api:get_payment_details(PayId)
+                      {Type, efb_api:get_payment_details(PayId)}
               end, Entries).
