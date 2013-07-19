@@ -39,7 +39,7 @@ handle_graph(_Mehtod, _Req) ->
 handle_realtime('POST', Req) ->
     Payload = elli_request:body(Req),
     Signature = get_signature(Req),
-    case efb_api:validate_signature(Signature, Payload) of
+    case efb_api:validate_signature(Payload, Signature) of
         true  ->
             lists:foreach(fun (Type, Detail) ->
                                   callback_exec(get_fun(Type), Detail)

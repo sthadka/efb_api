@@ -45,10 +45,11 @@ verify_token(Token) ->
     Token =:= ?TO_B(efb_conf:get(realtime_token)).
 
 %% Validate realtime payload signature
+%% TODO: Find a faster solution
 -spec validate_signature(binary(), binary()) -> boolean().
 validate_signature(Payload, Signature) ->
     <<Mac:160/integer>> = crypto:sha_mac(efb_conf:get(fb_secret), Payload),
-    lists:flatten(io_lib:format("~40.16.0b", [Mac])) =:= Signature.
+    ?TO_B(lists:flatten(io_lib:format("~40.16.0b", [Mac]))) =:= Signature.
 
 -spec parse_realtime_payload(binary()) -> {binary(), [binary()]}.
 parse_realtime_payload(Payload) ->
