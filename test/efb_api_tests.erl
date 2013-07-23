@@ -3,6 +3,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -define(CALLBACK, efb_example).
+-define(FB_ID, <<"2355">>).
 -define(FB_SECRET, <<"4711">>).
 -define(APP_TOKEN, <<"9422">>).
 
@@ -16,11 +17,12 @@ efb_api_test_() ->
      ]}.
 
 setup() ->
+    application:start(efb),
     efb_api:setup([{callback, ?CALLBACK},
+                   {fb_id, ?FB_ID},
                    {fb_secret, ?FB_SECRET},
                    {app_token, ?APP_TOKEN}
                   ]),
-    application:start(efb),
     meck:new(efb_graph, [passthrough]),
     meck:expect(efb_graph, get_payment_details,
                 fun(PayId, _Token) ->
