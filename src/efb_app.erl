@@ -16,6 +16,7 @@ start(_StartType, _StartArgs) ->
     application:start(ssl),
     application:start(lhttpc),
 
+    efb_conf:new(),
     efb_sup:start_link().
 
 stop(_State) ->

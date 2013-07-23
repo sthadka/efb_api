@@ -14,7 +14,6 @@
 %% * Get app_acccess_token and cache it if we only have fb credentials
 setup(Options) ->
     check_options(Options),
-    efb_conf:new(),
     efb_conf:set(Options).
 
 %% Returns payment details given signed request or payment id
