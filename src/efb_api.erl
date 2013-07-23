@@ -1,20 +1,20 @@
 -module(efb_api).
 
--export([setup/1,get_payment_details/1,
-         get_app_access_token/0, get_app_access_token/2,
+-export([setup/1, get_payment_details/1,
+         get_app_access_token/0, get_app_access_token/2, set_app_access_token/0,
          verify_token/1, validate_signature/2, parse_realtime_payload/1
         ]).
 
 -include_lib("efb.hrl").
 
-%-define(REQUIRED_OPTS, [callback, fb_secret, app_token]).
+-define(REQUIRED_OPTS, [callback, fb_id, fb_secret]).
 
 %% TODO
 %% * relax init conditions
 %% * Get app_acccess_token and cache it if we only have fb credentials
 setup(Options) ->
+    check_options(Options),
     efb_conf:new(),
-%    check_options(Options),
     efb_conf:set(Options).
 
 %% Returns payment details given signed request or payment id
@@ -39,6 +39,12 @@ get_app_access_token(FbId, FbSecret) ->
     {ok, Res} = efb_graph:get_app_access_token(FbId, FbSecret),
     hd(tl(binary:split(Res, <<"=">>))).
 
+-spec set_app_access_token() -> binary().
+set_app_access_token() ->
+    Token = get_app_access_token(),
+    efb_conf:set(app_token, Token),
+    Token.
+
 %% Verify real time api token
 -spec verify_token(binary()) -> boolean().
 verify_token(Token) ->
@@ -60,30 +66,30 @@ parse_realtime_payload(Payload) ->
 % -------------------------------------------------------------------
 % Internal functions
 % -------------------------------------------------------------------
-%check_options(Options) ->
-%    lists:foreach(
-%        fun(Option) -> case proplists:get_value(Option, Options) of
-%                           undefined ->
-%                               throw({error, {missing_opt, Option}});
-%                           _         ->
-%                               ok
-%                       end
-%        end, ?REQUIRED_OPTS).
-%
-%    validate_callback(proplists:get_value(callback, Options)).
+check_options(Options) ->
+    lists:foreach(
+        fun(Option) -> case proplists:get_value(Option, Options) of
+                           undefined ->
+                               throw({error, {missing_option, Option}});
+                           _         ->
+                               ok
+                       end
+        end, ?REQUIRED_OPTS),
+
+    validate_callback(proplists:get_value(callback, Options)).
 
 % Check if the callback module implements all the required functions
-%validate_callback(Mod) ->
-%    ReqCallbacks = efb_handler:behaviour_info(callbacks),
-%    ModFunctions = Mod:module_info(exports),
-%    lists:foreach(fun(Function) ->
-%                          case lists:member(Function, ModFunctions) of
-%                              true ->
-%                                  ok;
-%                              false ->
-%                                  throw({error, callback_function_missing})
-%                          end
-%                  end, ReqCallbacks).
+validate_callback(Mod) ->
+    ReqCallbacks = efb_handler:behaviour_info(callbacks),
+    ModFunctions = Mod:module_info(exports),
+    lists:foreach(fun(Function) ->
+                          case lists:member(Function, ModFunctions) of
+                              true ->
+                                  ok;
+                              false ->
+                                  throw({error, callback_function_missing})
+                          end
+                  end, ReqCallbacks).
 
 %% Query graph api based on type for details
 get_details(<<"payments">>=Type, Entries) ->
