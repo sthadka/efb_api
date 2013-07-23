@@ -12,10 +12,8 @@ to_integer(B) when is_binary(B) ->
     to_integer(?b2l(B));
 to_integer(L) when is_list(L) ->
     case catch ?l2i(L) of
-        {'EXIT', _} ->
-            throw({error, {not_a_valid_integer, L}});
-        Int ->
-            Int
+        {'EXIT', _} -> throw({error, {not_a_valid_integer, L}});
+        Int         -> Int
     end.
 
 -spec to_binary(any()) -> binary().

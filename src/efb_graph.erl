@@ -23,6 +23,9 @@ get_app_access_token(FbId, FbSecret) ->
 
 get_worker() ->
     case poolboy:checkout(fb_graph_pool, false) of
-        full                       -> ok; % TODO: log this
-        Worker when is_pid(Worker) -> Worker
+        full ->
+            error_logger:warning_msg("Efb: fb_graph_pool is full ~n", []),
+            ok;
+        Worker when is_pid(Worker) ->
+            Worker
     end.

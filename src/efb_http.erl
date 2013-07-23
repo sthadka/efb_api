@@ -44,8 +44,7 @@ handle_realtime('POST', Req) ->
                                   callback_exec(get_fun(Type), Detail)
                           end, efb_api:parse_realtime_payload(Payload));
         false ->
-            % TODO: log this
-            ok
+            throw({error, invalid_payload_signature})
     end,
 
     {200, [{<<"Content-Type">>, <<"text/plain">>}], <<"OK">>};

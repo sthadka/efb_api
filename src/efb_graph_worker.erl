@@ -60,9 +60,11 @@ code_change(_OldVsn, State, _Extra) ->
 % -------------------------------------------------------------------
 % Internal functions
 % -------------------------------------------------------------------
+
 build_url(Id, Args) ->
     <<?GRAPH_URL/binary, (?TO_B(Id))/binary, (list_to_qs(Args))/binary>>.
 
+%% Proplist to query string
 list_to_qs(PList) ->
     lists:foldl(fun ({Key, Val}, <<>>) ->
                         <<$?, (?TO_B(Key))/binary, "=", (?TO_B(Val))/binary>>;
