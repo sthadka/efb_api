@@ -11,7 +11,6 @@
 
 -record(state, {}).
 
-%% TODO: Add Oauth support
 -define(GRAPH_URL, <<"https://graph.facebook.com/">>).
 -define(TIMEOUT, 5000).
 

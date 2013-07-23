@@ -35,7 +35,6 @@ handle_graph(_Mehtod, _Req) ->
     {405, [], <<"Method Not Allowed">>}.
 
 %% Realtime API callback
-%% TODO: Make this more general to handle other real time calls
 handle_realtime('POST', Req) ->
     Payload = elli_request:body(Req),
     Signature = get_signature(Req),
