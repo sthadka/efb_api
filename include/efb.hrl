@@ -18,3 +18,9 @@
 
 -define(GRAPH_PREFIX, <<"lpay">>).
 -define(REALTIME_PREFIX, <<"rtpay">>).
+-define(PAYMENT_PREFIX, <<"payment">>).
+
+-define(DYN_PRICE_METHOD, <<"payments_get_item_price">>).
+
+-define(CHANNEL_PATH, <<"channel.html">>).
+-define(OPENGRAPH_PATH, <<"og">>).

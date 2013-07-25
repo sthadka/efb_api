@@ -5,15 +5,17 @@
 
 -export([handle/2, handle_event/3]).
 
-handle(Req, _Args) ->
+handle(Req, Args) ->
     %% TODO: make prefix configurable
     case elli_request:path(Req) of
         [?GRAPH_PREFIX | _Path] ->
             handle_graph(elli_request:method(Req), Req);
         [?REALTIME_PREFIX | _Path] ->
             handle_realtime(elli_request:method(Req), Req);
+        [?PAYMENT_PREFIX | _Path] ->
+            handle_dyn_price(elli_request:method(Req), Req);
         _ ->
-            {404, [], <<"Not Found">>}
+            efb_fbapp:handle(Req, Args)
     end.
 
 handle_event(_, _, _) ->
@@ -23,6 +25,7 @@ handle_event(_, _, _) ->
 % Internal functions
 % -------------------------------------------------------------------
 
+%% Request from javascript callback
 handle_graph('POST', Req) ->
     SignedRequest = proplists:get_value(<<"signed_request">>, get_args(Req)),
     Details = efb_api:get_payment_details(SignedRequest),
@@ -63,6 +66,25 @@ handle_realtime('GET', Req) ->
 
 handle_realtime(_Mehtod, _Req) ->
     {405, [], <<"Method Not Allowed">>}.
+
+%% Dynamic pricing
+handle_dyn_price('POST', Req) ->
+    Args = get_args(Req),
+    case proplists:get_value(<<"method">>, Args) =:= ?DYN_PRICE_METHOD of
+        false ->
+            {404, [], <<"Not Found">>};
+        true ->
+            SignedRequest = proplists:get_value(<<"signed_request">>, Args),
+            FBReq = efb_api:parse_signed_request(SignedRequest),
+            Response = jiffy:encode(callback_exec(get_dynamic_price, FBReq)),
+            {200, [{<<"Content-Type">>, <<"application/json">>}], Response}
+    end;
+
+handle_dyn_price('GET', _Req) ->
+    {404, [], <<"Not Found">>};
+handle_dyn_price(_Mehtod, _Req) ->
+    {405, [], <<"Method Not Allowed">>}.
+
 
 callback_exec(F, A) ->
     Callback = efb_conf:get(callback),

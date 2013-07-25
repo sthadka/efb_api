@@ -2,7 +2,8 @@
 
 -export([setup/1, get_payment_details/1,
          get_app_access_token/0, get_app_access_token/2, set_app_access_token/0,
-         verify_token/1, validate_signature/2, parse_realtime_payload/1
+         verify_token/1, validate_signature/2, parse_realtime_payload/1,
+         parse_signed_request/1
         ]).
 
 -include_lib("efb.hrl").
@@ -16,8 +17,7 @@ setup(Options) ->
 %% Returns payment details given signed request or payment id
 -spec get_payment_details(binary() | integer()) -> term().
 get_payment_details(SReq) when is_binary(SReq) ->
-    {ok, Json} = fb_signed_request:parse(SReq, efb_conf:get(fb_secret)),
-    {Req} = jiffy:decode(Json),
+    {Req} = parse_signed_request(SReq),
     PayId = ?TO_I(proplists:get_value(<<"payment_id">>, Req)),
     get_payment_details(PayId);
 
@@ -58,6 +58,11 @@ parse_realtime_payload(Payload) ->
     Type = jsonpath:search(<<"object">>, Payload),
     Entries =  jsonpath:search(<<"entry">>, Payload),
     get_details(Type, Entries).
+
+-spec parse_signed_request(binary()) -> binary().
+parse_signed_request(SReq) ->
+    {ok, Json} = fb_signed_request:parse(SReq, efb_conf:get(fb_secret)),
+    jiffy:decode(Json).
 
 % -------------------------------------------------------------------
 % Internal functions
