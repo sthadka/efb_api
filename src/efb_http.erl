@@ -38,19 +38,30 @@ handle_graph(_Mehtod, _Req) ->
     {405, [], <<"Method Not Allowed">>}.
 
 %% Realtime API callback
+%% We parse the API request here and try to make a graph query for each of the
+%% listed entries. If any of that fails, we return HTTP 400 which FB uses to
+%% re-trigger this call.
 handle_realtime('POST', Req) ->
     Payload = elli_request:body(Req),
     Signature = get_signature(Req),
     case efb_api:validate_signature(Payload, Signature) of
         true  ->
-            lists:foreach(fun ({Type, Detail}) ->
-                                  callback_exec(get_fun(Type), Detail)
-                          end, efb_api:parse_realtime_payload(Payload));
+            try
+                lists:foreach(fun ({Type, Detail}) ->
+                                      callback_exec(get_fun(Type), Detail)
+                              end, efb_api:parse_realtime_payload(Payload)),
+                {200, [{<<"Content-Type">>, <<"text/plain">>}], <<"OK">>}
+            catch
+                Class:Reason ->
+                    error_logger:error_msg("Payment API failed: ~p:~p",
+                                           [Class, Reason]),
+                    {400, [{<<"Content-Type">>,
+                            <<"text/plain">>}], <<"Bad Request">>}
+            end;
         false ->
-            throw({error, invalid_payload_signature})
-    end,
-
-    {200, [{<<"Content-Type">>, <<"text/plain">>}], <<"OK">>};
+            error_logger:error_msg("Payment invalid_signature: ~p", [Req]),
+            {400, [{<<"Content-Type">>, <<"text/plain">>}], <<"Bad Request">>}
+    end;
 
 %% Real time API "Subscription Verification"
 handle_realtime('GET', Req) ->
