@@ -10,6 +10,7 @@
 
 -define(REQUIRED_OPTS, [callback, fb_id, fb_secret]).
 
+-spec setup(list()) -> ok.
 setup(Options) ->
     check_options(Options),
     efb_conf:set(Options).
