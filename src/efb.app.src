@@ -1,7 +1,7 @@
 {application, efb,
  [
   {description, ""},
-  {vsn, "1"},
+  {vsn, "2"},
   {registered, []},
   {applications, [
                   kernel,

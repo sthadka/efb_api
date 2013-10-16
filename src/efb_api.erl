@@ -97,5 +97,6 @@ validate_callback(Mod) ->
 get_details(<<"payments">>=Type, Entries) ->
     lists:map(fun (Entry) ->
                       PayId = ?TO_I(jsonpath:search(<<"id">>, Entry)),
-                      {Type, efb_api:get_payment_details(PayId)}
+                      {Type, jsonpath:search(<<"changed_fields">>, Entry),
+                       efb_api:get_payment_details(PayId)}
               end, Entries).

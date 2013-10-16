@@ -47,8 +47,9 @@ handle_realtime('POST', Req) ->
     case efb_api:validate_signature(Payload, Signature) of
         true  ->
             try
-                lists:foreach(fun ({Type, Detail}) ->
-                                      callback_exec(get_fun(Type), Detail)
+                lists:foreach(fun ({Type, ChangedFields, Detail}) ->
+                                      callback_exec(get_fun(Type),
+                                                    Detail, ChangedFields)
                               end, efb_api:parse_realtime_payload(Payload)),
                 {200, [{<<"Content-Type">>, <<"text/plain">>}], <<"OK">>}
             catch
@@ -101,6 +102,10 @@ callback_exec(F, A) ->
     Callback = efb_conf:get(callback),
     Callback:F(A).
 
+callback_exec(F, A1, A2) ->
+    Callback = efb_conf:get(callback),
+    Callback:F(A1, A2).
+
 get_args(Req) ->
     case catch elli_request:body_qs(Req) of
         {'EXIT', {badarg, _}} -> elli_request:get_args(Req);
@@ -112,5 +117,6 @@ get_signature(Req) ->
     lists:nth(2, binary:split(H, <<"=">>)).
 
 %% Map FB realtime API object to internal callback function
+%% We only support payments currently
 get_fun(<<"payments">>) ->
     payment_event.
