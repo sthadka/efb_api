@@ -13,7 +13,8 @@ efb_api_test_() ->
      [
       ?_test(get_payment_details()),
       ?_test(validate_signature()),
-      ?_test(parse_realtime_payload())
+      ?_test(parse_realtime_payload_actions()),
+      ?_test(parse_realtime_payload_disputes())
      ]}.
 
 setup() ->
@@ -46,11 +47,18 @@ get_payment_details() ->
     ?assertEqual(expected_payment_details(), Result1).
 
 validate_signature() ->
-    ?assert(efb_api:validate_signature(realtime_payload(), realtime_signature())).
+    ?assert(efb_api:validate_signature(realtime_payload_actions(),
+                                       realtime_signature())).
 
-parse_realtime_payload() ->
-    Result = efb_api:parse_realtime_payload(realtime_payload()),
-    ?assertEqual([{<<"payments">>, expected_payment_details()}], Result).
+parse_realtime_payload_actions() ->
+    Result = efb_api:parse_realtime_payload(realtime_payload_actions()),
+    ?assertEqual([{<<"payments">>, [<<"actions">>],
+                   expected_payment_details()}], Result).
+
+parse_realtime_payload_disputes() ->
+    Result = efb_api:parse_realtime_payload(realtime_payload_disputes()),
+    ?assertEqual([{<<"payments">>, [<<"disputes">>],
+                   expected_payment_details()}], Result).
 
 
 % -------------------------------------------------------------------
@@ -93,8 +101,11 @@ expected_payment_details() ->
 graph_payment_details() ->
     <<"{\"id\":\"307071849423319\",\"user\":{\"name\":\"John Doe\",\"id\":\"47114711\"},\"application\":{\"name\":\"Tester\",\"namespace\":\"test_signed\",\"id\":\"301303576646753\"},\"actions\":[{\"type\":\"charge\",\"status\":\"completed\",\"currency\":\"USD\",\"amount\":\"49.90\",\"time_created\":\"2013-07-22T12:39:28+0000\",\"time_updated\":\"2013-07-22T12:39:28+0000\"}],\"refundable_amount\":{\"currency\":\"USD\",\"amount\":\"49.90\"},\"items\":[{\"type\":\"IN_APP_PURCHASE\",\"product\":\"http://example.com/og/payment?product=product_id\",\"quantity\":1}],\"country\":\"US\",\"created_time\":\"2013-07-22T12:39:28+0000\",\"test\":1,\"fraud_status\":\"UNKNOWN\",\"payout_foreign_exchange_rate\":1}">>.
 
-realtime_payload() ->
+realtime_payload_actions() ->
     <<"{\"object\":\"payments\",\"entry\":[{\"id\":\"307071849423319\",\"time\":1374501645,\"changed_fields\":[\"actions\"]}]}">>.
+
+realtime_payload_disputes() ->
+    <<"{\"object\":\"payments\",\"entry\":[{\"id\":\"307071849423319\",\"time\":1374501645,\"changed_fields\":[\"disputes\"]}]}">>.
 
 realtime_signature() ->
     <<"9005ece0142af06f4003a8590d686e6c592231b5">>.
